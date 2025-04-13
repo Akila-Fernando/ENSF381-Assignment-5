@@ -107,21 +107,51 @@ def enroll(student_id):
     return jsonify({'message': 'Enrolled successfully'})
 
 
-# def rjson(filename):
-#     base_path = os.path.dirname(__file__)
-#     file_path = os.path.join(base_path, filename)
-#     with open(file_path, 'r', encoding='utf-8') as file:
-#         return json.load(file)
+# Route to delete an enrolled course
+@app.route('/drop/<student_id>', methods=['DELETE'])
+def drop(student_id):
+    data = request.get_json()
+    student = data.get('student_id')
+    course_id = data.get('course_id')
 
-# @app.route('/backend/courses', methods=['GET'])
-# def get_courses():
-#     courses = rjson('courses.json')
-#     return jsonify(courses)
+    if not student:
+        return jsonify({'message': 'Student not found'})
+    
+    backend_folder = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(backend_folder, 'courses.json')) as f:
+        courses_data = json.load(f)
 
-# @app.route('/backend/testimonials', methods=['GET'])
-# def get_courses():
-#     courses = rjson('testimonials.json')
-#     return jsonify(courses)
+
+    course = next((c for c in courses_data if c['id'] == course_id), None)
+    if not course:
+        return jsonify({'message': 'Course not found'})
+
+    student['enrolled_courses'] = [
+        c for c in student['enrolled_courses'] if c['id'] != course_id
+    ]
+
+    return jsonify({'message': 'Course dropped successfully'})
+
+
+# Route to get all courses
+@app.route('/courses', methods=['GET'])
+def get_courses():
+    try:
+        backend = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(backend, 'courses.json')) as f:
+            courses_data = json.load(f)
+        return jsonify(courses_data)
+    except Exception as e:
+        return jsonify({'message': f'Error loading courses: {str(e)}'})
+    
+# Route to get a course enroolled by a student
+@app.route('/student_courses/<student_id>', methods=['GET'])
+def get_student_courses(student_id):
+    student = next((s for s in students if s['id'] == int(student_id)), None)
+    if not student:
+        return jsonify({'message': 'Student not found'})
+    
+    return jsonify(student['enrolled_courses'])
 
 
 if __name__ == '__main__':
