@@ -1,6 +1,10 @@
+# ENSF 381 Group 8 Members:
+# Akila Fernando - 30169955
+# Tanvi Mahalwar - 30210358
+
+
 from flask import Flask, request, jsonify
-import json
-import os
+import json, os, random
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -29,26 +33,6 @@ students = [
         "enrolled_courses": []
     }
 ]
-
-# @app.route('/')
-# def index():
-#     return "Welcome to the Flask API!"
-
-# def rjson(filename):
-#     base_path = os.path.dirname(__file__)
-#     file_path = os.path.join(base_path, filename)
-#     with open(file_path, 'r', encoding='utf-8') as file:
-#         return json.load(file)
-
-# @app.route('/backend/courses', methods=['GET'])
-# def get_courses():
-#     courses = rjson('courses.json')
-#     return jsonify(courses)
-
-# @app.route('/backend/testimonials', methods=['GET'])
-# def get_courses():
-#     courses = rjson('testimonials.json')
-#     return jsonify(courses)
 
 #Route to register student
 @app.route('/register', methods=['POST'])
@@ -84,6 +68,61 @@ def authenticate_user():
         if student['username'] == entered_username and student['password'] == entered_password:
             return jsonify({"authenticated": True, "message": "Authentication successful"})
     return jsonify({"authenticated": False, "message": "Authentication failed. Incorrect username or password."})
+
+
+# Random testimonials
+@app.route('/testimonials', methods=['GET'])
+def get_testimonials():
+    try:
+        backend = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(backend, 'testimonials.json')) as f:
+            testimonials_data = json.load(f)
+        return jsonify(random.sample(testimonials_data, 2))
+    except Exception as e:
+        return jsonify({'message': f'Error loading testimonials: {str(e)}'})
+
+
+
+# Route to enroll student in a course
+@app.route('/enroll/<student_id>', methods=['POST'])
+def enroll(student_id):
+    data = request.get_json()
+    student = data.get('student_id')
+    course_id = data.get('course_id')
+
+    if not student_id:
+        return jsonify({'message': 'Student not found'})
+    
+    backend_folder = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(backend_folder, 'courses.json')) as f:
+        courses_data = json.load(f)
+
+    course = next((c for c in courses_data if c['id'] == course_id), None)
+    if not course:
+        return jsonify({'message': 'Course not found'})
+    if any(c['id'] == course_id for c in student['enrolled_courses']):
+        return jsonify({'message': 'Already enrolled in this course'}),
+
+    student['enrolled_courses'].append(course)
+    return jsonify({'message': 'Enrolled successfully'})
+
+
+# def rjson(filename):
+#     base_path = os.path.dirname(__file__)
+#     file_path = os.path.join(base_path, filename)
+#     with open(file_path, 'r', encoding='utf-8') as file:
+#         return json.load(file)
+
+# @app.route('/backend/courses', methods=['GET'])
+# def get_courses():
+#     courses = rjson('courses.json')
+#     return jsonify(courses)
+
+# @app.route('/backend/testimonials', methods=['GET'])
+# def get_courses():
+#     courses = rjson('testimonials.json')
+#     return jsonify(courses)
+
 
 if __name__ == '__main__':
     app.run()
