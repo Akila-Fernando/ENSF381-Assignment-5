@@ -50,6 +50,29 @@ students = [
 #     courses = rjson('testimonials.json')
 #     return jsonify(courses)
 
+#Route to register student
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    username = data.get('username')
+    password = data.get('password')
+    email = data.get('email')
+
+    for student in students:
+        if(student['username'] == username):
+            return jsonify({"success": False, "message": "Username is already taken."})
+
+    new_student = {
+        "id": len(students) + 1,
+        "username": username,
+        "password": password,
+        "email": email,
+        "enrolled_courses": []
+    }
+    students.append(new_student)
+
+    return jsonify({"success": True, "message": "Registration successful."})
+
 # Route to authenticate user
 @app.route('/login', methods=['POST'])
 def authenticate_user():

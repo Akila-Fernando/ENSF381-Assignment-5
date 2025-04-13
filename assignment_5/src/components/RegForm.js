@@ -42,11 +42,34 @@ function RegForm () {
     const handleSubmit = (e) => {
       e.preventDefault();
       if (validateForm()) {
-        //transfer to backend
-        setSuccess("Signup successful! Redirecting to login...");
-        setTimeout(() => {
-          navigate('/login');
-        }, 1000);
+        fetch('http://127.0.0.1:5000/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username: username,
+            password: password,
+            email: email
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            setSuccess(data.message);
+            setError('');
+            setTimeout(() => {
+              navigate('/login');
+            }, 1000);
+          } else {
+            setError(data.message);
+            setSuccess('');
+          }
+        })
+        .catch(err => {
+          setError('Something went wrong. Please try again.');
+          setSuccess('');
+        });
       }
     };
   
