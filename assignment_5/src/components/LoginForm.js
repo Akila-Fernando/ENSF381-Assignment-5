@@ -15,26 +15,36 @@ const LoginForm = () => {
     setIsLoading(true);
     setError('');
 
-    try {
-      const response = await fetch('https://jsonplaceholder.typicode.com/users');
-      const users = await response.json();
-      const validUser = users.find(u => u.username === username && u.email === password);
+    fetch('http://127.0.0.1:5000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({'username': username, 'password': password})
+    })
+    .then(response => response.json())
+    .then(response => {
 
-      if (validUser) {
-        login(validUser);
-        // Redirect after 2 seconds
+      if(response.authenticated) {
+        login({ username });
+
         setTimeout(() => {
           navigate('/courses');
-        }, 2000);
+          setIsLoading(false);
+        }, 1000);
+
       } else {
-        setError('Invalid username or password!');
+        setError(response.message);
+        setIsLoading(false);
       }
-    } catch (err) {
-      setError('Failed to connect to the server. Please try again later.');
-    } finally {
+      
+    })
+    .catch(error => {
+      setError('Authentication failed. Incorrect username or password.' );
       setIsLoading(false);
-    }
-  };
+    }) 
+  }
+
 
   return (
     <form onSubmit={handleSubmit} style={{ width: '100%' }}>
@@ -77,12 +87,12 @@ const LoginForm = () => {
           {error}
         </div>
       )}
-
+      <div style={{display: 'flex', justifyContent: 'center'}}>
       <button 
         type="submit" 
         disabled={isLoading}
         style={{
-          width: '100%',
+          width: '70%',
           padding: '10px',
           backgroundColor: isLoading ? '#BDBDBD' : '#004080',
           color: 'white',
@@ -93,6 +103,7 @@ const LoginForm = () => {
       >
         {isLoading ? 'Authenticating...' : 'Login'}
       </button>
+      </div>
     </form>
   );
 };
