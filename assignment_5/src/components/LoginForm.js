@@ -26,7 +26,8 @@ const LoginForm = () => {
     .then(response => {
 
       if(response.authenticated) {
-        login({ username });
+        const userData = { username, studentId: response.student.id}
+        login(userData);
 
         setTimeout(() => {
           navigate('/courses');

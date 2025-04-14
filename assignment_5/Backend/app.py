@@ -71,7 +71,7 @@ def authenticate_user():
     # Check if the entered username and password match any user in the array
     for student in students:
         if student['username'] == entered_username and student['password'] == entered_password:
-            return jsonify({"authenticated": True, "message": "Authentication successful"})
+            return jsonify({"authenticated": True, "message": "Authentication successful", "student": student})
     return jsonify({"authenticated": False, "message": "Authentication failed. Incorrect username or password."})
 
 
@@ -81,21 +81,65 @@ def get_random_testimonials():
     random_testimonials = random.sample(testimonials, 2)
     return jsonify(random_testimonials)
 
-@app.route('/courses', methods=['GET'])
+@app.route('/courses/random', methods=['GET'])
 def get_random_courses():
     random_courses = random.sample(courses, 3)
     return jsonify(random_courses)
 
-# # Route to enroll student in a course
-# @app.route('/enroll/<student_id>', methods=['POST'])
+# Route to enroll student in a course
+@app.route('/enroll/<student_id>', methods=['POST'])
+def enroll_course(student_id):
+    course = request.get_json()
 
+    student = None
+    for s in students:
+        if s['id'] == int(student_id):
+            student = s
+            break
+
+    if not student:
+        return jsonify({"message": "Student not found"})
+
+    student['enrolled_courses'].append(course)
+    return jsonify({"message": "Course enrolled successfully"})
 
 # # Route to delete an enrolled course
-# @app.route('/drop/<student_id>', methods=['DELETE'])
+@app.route('/drop/<student_id>', methods=['DELETE'])
+def drop_course(student_id):
+    data = request.get_json()
+    course_id = data.get('id')
+
+    student = None
+    for s in students:
+        if s['id'] == int(student_id):
+            student = s
+            break
+
+    if not student:
+        return jsonify({"message": "Student not found"})
+    
+    return jsonify({"message": "Course dropped successfully"})
+
+# Route to get all available courses
+@app.route('/courses', methods=['GET'])
+def get_all_courses():
+    return jsonify(courses)
 
 
-# # Route to get a course enroolled by a student
-# @app.route('/student_courses/<student_id>', methods=['GET'])
+# Route to get courses enrolled by a student
+@app.route('/student_courses/<student_id>', methods=['GET'])
+def get_student_courses(student_id):
+    student = None
+    for s in students:
+        if s['id'] == int(student_id):
+            student = s
+            break
+
+    if not student:
+        return jsonify([])
+
+    return jsonify(student['enrolled_courses'])
+
 
 
 if __name__ == '__main__':

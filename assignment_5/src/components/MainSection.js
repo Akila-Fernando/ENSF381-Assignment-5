@@ -6,16 +6,15 @@ const MainSection = () => {
   const [randomTestimonials, setRandomTestimonials] = useState([]);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:5000/courses')
+    fetch('http://127.0.0.1:5000/courses/random')
     .then((response) => response.json())
     .then((data) => setFeaturedCourses(data))
-    .catch((error) => console.error('Error fetching courses:', error));  }, []);
+    .catch((error) => console.error('Error fetching courses:', error));
 
     fetch('http://127.0.0.1:5000/testimonials')
     .then((response) => response.json())
     .then((data) => setRandomTestimonials(data))
     .catch((error) => console.error('Error fetching testimonials:', error));  }, []);
-
   return (
     <main>
       <section className="about">

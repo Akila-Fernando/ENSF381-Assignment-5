@@ -9,7 +9,7 @@ const Homepage = () => {
 
   useEffect(() => {
     // Select 3 random courses
-    fetch('http://127.0.0.1:5000/courses')
+    fetch('http://127.0.0.1:5000/courses/random')
     .then((response) => response.json())
     .then((data) => setFeaturedCourses(data))
     .catch((error) => console.error('Error fetching courses:', error));
