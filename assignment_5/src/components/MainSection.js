@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import courses from '../data/courses';
-import testimonials from '../data/testimonials';
 
 const MainSection = () => {
   const [featuredCourses, setFeaturedCourses] = useState([]);
   const [randomTestimonials, setRandomTestimonials] = useState([]);
 
   useEffect(() => {
-    // Randomize courses and testimonials
-    setFeaturedCourses([...courses].sort(() => 0.5 - Math.random()).slice(0, 3));
-    setRandomTestimonials([...testimonials].sort(() => 0.5 - Math.random()).slice(0, 2));
-  }, []);
+    fetch('http://127.0.0.1:5000/courses')
+    .then((response) => response.json())
+    .then((data) => setFeaturedCourses(data))
+    .catch((error) => console.error('Error fetching courses:', error));  }, []);
+
+    fetch('http://127.0.0.1:5000/testimonials')
+    .then((response) => response.json())
+    .then((data) => setRandomTestimonials(data))
+    .catch((error) => console.error('Error fetching testimonials:', error));  }, []);
 
   return (
     <main>
@@ -42,3 +46,5 @@ const MainSection = () => {
     </main>
   );
 };
+
+export default MainSection;
